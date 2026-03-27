@@ -1,0 +1,61 @@
+name: Sync Icons
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 3 * * *"
+  push:
+    paths:
+      - "scripts/**"
+      - ".github/workflows/sync-icons.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+
+      - name: Download upstream package
+        shell: bash
+        run: |
+          mkdir -p .tmp/upstream
+          PACKAGE_FILE="$(npm pack @lobehub/icons-static-png@latest | tail -n 1)"
+          tar -xzf "$PACKAGE_FILE" -C .tmp/upstream
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip pillow
+
+      - name: Generate icons
+        run: python scripts/generate_all_icons.py --package-dir .tmp/upstream/package
+
+      - name: Commit changes
+        shell: bash
+        run: |
+          git add -A IconSet
+
+          if git diff --cached --quiet -- IconSet; then
+            echo "No icon changes"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: sync icons"
+          git push

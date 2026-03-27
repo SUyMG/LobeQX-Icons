@@ -1,0 +1,13 @@
+{
+  "aliases": {
+    "light/anthropic.png": "Claude.png",
+    "dark/gemini-color.png": "Gemini.png",
+    "light/openai.png": "OpenAI.png",
+    "dark/perplexity-color.png": "Perplexity.png",
+    "light/xai.png": "Grok.png",
+    "light/copilot.png": "Copilot.png",
+    "light/apple.png": "Apple.png",
+    "light/microsoft.png": "Microsoft.png"
+  },
+  "exclude": []
+}
